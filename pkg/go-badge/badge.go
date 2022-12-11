@@ -45,6 +45,21 @@ func (d *badgeDrawer) Render(tplName, subject, status string, color Color, w io.
 	statusDx := d.measureString(status)
 	d.mutex.Unlock()
 
+	if tplName == "flat-square" {
+		const iconPadding = 18
+		return d.tmpl.Execute(w, badge{
+			Subject: subject,
+			Status:  status,
+			Color:   color,
+			Bounds: bounds{
+				SubjectDx: subjectDx + iconPadding,
+				SubjectX:  subjectDx/2.0 + 1 + iconPadding,
+				StatusDx:  statusDx,
+				StatusX:   subjectDx + statusDx/2.0 - 1 + iconPadding,
+			},
+		})
+	}
+
 	if tplName == "plastic" {
 		const iconPadding = 18
 		return d.tmpl.Execute(w, badge{
@@ -105,20 +120,28 @@ const (
 
 var drawer *badgeDrawer
 
+// TODO change theme via parameters
 func init() {
 	// drawer = &badgeDrawer{
 	// 	fd:    mustNewFontDrawer(fontsize, dpi),
-	// 	tmpl:  template.Must(template.New("flat-template").Parse(badgeTemplate.FlatTemplate)),
+	// 	tmpl:  template.Must(template.New("flat-template").Parse(stripXmlWhitespace(badgeTemplate.FlatTemplate))),
 	// 	mutex: &sync.Mutex{},
 	// 	name:  "flat-template",
 	// }
 
 	drawer = &badgeDrawer{
 		fd:    mustNewFontDrawer(fontsize, dpi),
-		tmpl:  template.Must(template.New("plastic-template").Parse(stripXmlWhitespace(badgeTemplate.PlasticTemplate))),
+		tmpl:  template.Must(template.New("flat-square-template").Parse(stripXmlWhitespace(badgeTemplate.FlatSquareTemplate))),
 		mutex: &sync.Mutex{},
-		name:  "plastic-template",
+		name:  "flat-square",
 	}
+
+	// drawer = &badgeDrawer{
+	// 	fd:    mustNewFontDrawer(fontsize, dpi),
+	// 	tmpl:  template.Must(template.New("plastic-template").Parse(stripXmlWhitespace(badgeTemplate.PlasticTemplate))),
+	// 	mutex: &sync.Mutex{},
+	// 	name:  "plastic-template",
+	// }
 }
 
 func mustNewFontDrawer(size, dpi float64) *font.Drawer {
