@@ -8,6 +8,7 @@ import (
 
 	"github.com/golang/freetype/truetype"
 	fonts "github.com/soulteary/go-counting-stars/pkg/go-badge-fonts"
+	badgeTemplate "github.com/soulteary/go-counting-stars/pkg/go-badge-template"
 	"golang.org/x/image/font"
 )
 
@@ -35,15 +36,32 @@ type badgeDrawer struct {
 	fd    *font.Drawer
 	tmpl  *template.Template
 	mutex *sync.Mutex
+	name  string
 }
 
-func (d *badgeDrawer) Render(subject, status string, color Color, w io.Writer) error {
+func (d *badgeDrawer) Render(tplName, subject, status string, color Color, w io.Writer) error {
 	d.mutex.Lock()
 	subjectDx := d.measureString(subject)
 	statusDx := d.measureString(status)
 	d.mutex.Unlock()
 
-	bdg := badge{
+	if tplName == "plastic" {
+		const iconPadding = 18
+		return d.tmpl.Execute(w, badge{
+			Subject: subject,
+			Status:  status,
+			Color:   color,
+			Bounds: bounds{
+				SubjectDx: subjectDx + iconPadding,
+				SubjectX:  subjectDx/2.0 + 1 + iconPadding,
+				StatusDx:  statusDx,
+				StatusX:   subjectDx + statusDx/2.0 - 1 + iconPadding,
+			},
+		})
+	}
+
+	// flat
+	return d.tmpl.Execute(w, badge{
 		Subject: subject,
 		Status:  status,
 		Color:   color,
@@ -53,13 +71,12 @@ func (d *badgeDrawer) Render(subject, status string, color Color, w io.Writer) e
 			StatusDx:  statusDx,
 			StatusX:   subjectDx + statusDx/2.0 - 1,
 		},
-	}
-	return d.tmpl.Execute(w, bdg)
+	})
 }
 
-func (d *badgeDrawer) RenderBytes(subject, status string, color Color) ([]byte, error) {
+func (d *badgeDrawer) RenderBytes(tplName, subject, status string, color Color) ([]byte, error) {
 	buf := &bytes.Buffer{}
-	err := d.Render(subject, status, color, buf)
+	err := d.Render(tplName, subject, status, color, buf)
 	return buf.Bytes(), err
 }
 
@@ -72,13 +89,13 @@ func (d *badgeDrawer) measureString(s string) float64 {
 }
 
 // Render renders a badge of the given color, with given subject and status to w.
-func Render(subject, status string, color Color, w io.Writer) error {
-	return drawer.Render(subject, status, color, w)
+func Render(tplName, subject, status string, color Color, w io.Writer) error {
+	return drawer.Render(tplName, subject, status, color, w)
 }
 
 // RenderBytes renders a badge of the given color, with given subject and status to bytes.
-func RenderBytes(subject, status string, color Color) ([]byte, error) {
-	return drawer.RenderBytes(subject, status, color)
+func RenderBytes(tplName, subject, status string, color Color) ([]byte, error) {
+	return drawer.RenderBytes(tplName, subject, status, color)
 }
 
 const (
@@ -89,10 +106,18 @@ const (
 var drawer *badgeDrawer
 
 func init() {
+	// drawer = &badgeDrawer{
+	// 	fd:    mustNewFontDrawer(fontsize, dpi),
+	// 	tmpl:  template.Must(template.New("flat-template").Parse(badgeTemplate.FlatTemplate)),
+	// 	mutex: &sync.Mutex{},
+	// 	name:  "flat-template",
+	// }
+
 	drawer = &badgeDrawer{
 		fd:    mustNewFontDrawer(fontsize, dpi),
-		tmpl:  template.Must(template.New("flat-template").Parse(flatTemplate)),
+		tmpl:  template.Must(template.New("plastic-template").Parse(stripXmlWhitespace(badgeTemplate.PlasticTemplate))),
 		mutex: &sync.Mutex{},
+		name:  "plastic-template",
 	}
 }
 
