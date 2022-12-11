@@ -3,7 +3,7 @@ package badge
 import (
 	"bytes"
 	"html/template"
-	"io/ioutil"
+	"io"
 	"strings"
 	"sync"
 	"testing"
@@ -61,10 +61,10 @@ func TestBadgeDrawerRenderBytes(t *testing.T) {
 
 func BenchmarkRender(b *testing.B) {
 	// warm up
-	Render("XXX", "YYY", ColorBlue, ioutil.Discard)
+	Render("XXX", "YYY", ColorBlue, io.Discard)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		err := Render("XXX", "YYY", ColorBlue, ioutil.Discard)
+		err := Render("XXX", "YYY", ColorBlue, io.Discard)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -74,7 +74,7 @@ func BenchmarkRender(b *testing.B) {
 func BenchmarkRenderParallel(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			err := Render("XXX", "YYY", ColorBlue, ioutil.Discard)
+			err := Render("XXX", "YYY", ColorBlue, io.Discard)
 			if err != nil {
 				b.Fatal(err)
 			}
