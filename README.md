@@ -11,7 +11,11 @@ A simple and reliable visit counter, written in Go, capable of displaying visit 
 - Support serverless deployment, edge computing.
 
 
-## Project uses components
+## Project uses components and licenses
 
 - Web Server: https://github.com/gin-gonic/gin
+    - [MIT License](https://github.com/gin-gonic/gin/blob/master/LICENSE)
+- Badge styles: https://github.com/badges/shields
+    - [CC0 LICENSE](https://github.com/badges/shields/blob/master/LICENSE)
 - Badge Generate: https://github.com/narqo/go-badge (contains improvements)
+    - [MIT License](https://github.com/narqo/go-badge/blob/master/LICENSE)
