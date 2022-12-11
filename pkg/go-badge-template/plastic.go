@@ -26,4 +26,5 @@ const PlasticTemplate = `
 	<text x="{{.Bounds.StatusX}}" y="14" fill="#010101" fill-opacity=".3">{{.Status | html}}</text>
 	<text x="{{.Bounds.StatusX}}" y="13" fill="#fff">{{.Status | html}}</text>
 </g>
-</svg>`
+</svg>
+`
