@@ -26,6 +26,10 @@ type bounds struct {
 	// StatusDx is the width of status string of the badge.
 	StatusDx float64
 	StatusX  float64
+	// Only For The Social Theme
+	SocialBoundsDx  float64
+	SocialSubjectDx float64
+	SocialStatusDx  float64
 }
 
 func (b bounds) Dx() float64 {
@@ -90,6 +94,25 @@ func (d *badgeDrawer) Render(tplName, subject, status string, color Color, w io.
 		})
 	}
 
+	if tplName == "social" {
+		const iconPadding = 18
+		const StatusXFix = 2
+		return d.tmpl.Execute(w, badge{
+			Subject: subject,
+			Status:  status,
+			Color:   color,
+			Bounds: bounds{
+				SubjectDx:       subjectDx + iconPadding,
+				SubjectX:        subjectDx/2.0 + 1 + iconPadding,
+				StatusDx:        statusDx,
+				StatusX:         subjectDx + statusDx/2.0 - 1 + iconPadding + StatusXFix,
+				SocialBoundsDx:  subjectDx + iconPadding - 1,
+				SocialSubjectDx: subjectDx + iconPadding + 5,
+				SocialStatusDx:  statusDx - 8,
+			},
+		})
+	}
+
 	// flat
 	return d.tmpl.Execute(w, badge{
 		Subject: subject,
@@ -141,7 +164,7 @@ func init() {
 	// 	fd:    mustNewFontDrawer(fontsize, dpi),
 	// 	tmpl:  template.Must(template.New("flat-template").Parse(stripXmlWhitespace(badgeTemplate.FlatTemplate))),
 	// 	mutex: &sync.Mutex{},
-	// 	name:  "flat-template",
+	// 	name:  "flat",
 	// }
 
 	// drawer = &badgeDrawer{
@@ -158,11 +181,18 @@ func init() {
 	// 	name:  "plastic",
 	// }
 
+	// drawer = &badgeDrawer{
+	// 	fd:    mustNewFontDrawer(fontsize, dpi),
+	// 	tmpl:  template.Must(template.New("for-the-badge-template").Parse(stripXmlWhitespace(badgeTemplate.ForTheBadgeTemplate))),
+	// 	mutex: &sync.Mutex{},
+	// 	name:  "for-the-badge",
+	// }
+
 	drawer = &badgeDrawer{
 		fd:    mustNewFontDrawer(fontsize, dpi),
-		tmpl:  template.Must(template.New("for-the-badge-template").Parse(stripXmlWhitespace(badgeTemplate.ForTheBadgeTemplate))),
+		tmpl:  template.Must(template.New("social-template").Parse(stripXmlWhitespace(badgeTemplate.SocialTemplate))),
 		mutex: &sync.Mutex{},
-		name:  "for-the-badge",
+		name:  "social",
 	}
 
 }

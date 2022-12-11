@@ -14,20 +14,21 @@ import (
 func main() {
 
 	type Badge struct {
-		Subject string `uri:"subject" binding:"required"`
-		Status  string `uri:"status" binding:"required"`
-		Color   string `uri:"color" binding:"required"`
+		Template string `uri:"template" binding:"required"`
+		Subject  string `uri:"subject" binding:"required"`
+		Status   string `uri:"status" binding:"required"`
+		Color    string `uri:"color" binding:"required"`
 	}
 
 	route := gin.Default()
-	route.GET("/:subject/:status/:color/", func(c *gin.Context) {
+	route.GET("/:template/:subject/:status/:color/", func(c *gin.Context) {
 		var reqBadge Badge
 		if err := c.ShouldBindUri(&reqBadge); err != nil {
 			c.JSON(400, gin.H{"msg": err})
 			return
 		}
 
-		badgeBytes, err := badge.RenderBytes(reqBadge.Subject, reqBadge.Status, badge.Color(reqBadge.Color))
+		badgeBytes, err := badge.RenderBytes(reqBadge.Template, reqBadge.Subject, reqBadge.Status, badge.Color(reqBadge.Color))
 		if err != nil {
 			c.JSON(400, gin.H{"msg": err})
 			return
